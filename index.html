@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>股市操作记录</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page-shell">
+      <section id="login-view" class="login-view" aria-labelledby="login-title">
+        <div class="login-panel">
+          <p class="eyebrow">Supabase 共享登录</p>
+          <h1 id="login-title">股市操作记录</h1>
+          <p class="muted">输入网站密码后即可维护同一份操作记录。</p>
+
+          <form id="login-form" class="login-form">
+            <label for="password">网站密码</label>
+            <input id="password" type="password" autocomplete="current-password" required />
+            <button id="login-button" class="primary-button" type="submit">登录</button>
+          </form>
+          <p id="login-status" class="status hidden" role="status"></p>
+        </div>
+      </section>
+
+      <section id="app-view" class="app-view hidden" aria-label="股市操作记录">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">共享账本</p>
+            <h1>股市操作记录</h1>
+          </div>
+          <div class="top-actions">
+            <button id="refresh-button" class="icon-button" type="button" title="刷新">↻</button>
+            <button id="download-button" class="secondary-button" type="button">下载 JSON</button>
+            <button id="logout-button" class="secondary-button" type="button">退出</button>
+          </div>
+        </header>
+
+        <section class="toolbar" aria-label="新增记录">
+          <form id="add-form" class="record-form">
+            <label>
+              日期
+              <input id="date" placeholder="2026-0507" required />
+            </label>
+            <label>
+              名称
+              <input id="name" placeholder="小商品城" required />
+            </label>
+            <label>
+              代码
+              <input id="code" placeholder="600415.SH" required />
+            </label>
+            <label>
+              操作
+              <select id="operation" required>
+                <option value="买入">买入</option>
+                <option value="卖出">卖出</option>
+                <option value="加仓">加仓</option>
+                <option value="减仓">减仓</option>
+                <option value="观察">观察</option>
+              </select>
+            </label>
+            <label>
+              单价
+              <input id="price" type="number" min="0" step="0.0001" placeholder="12.2563" required />
+            </label>
+            <label>
+              操作股数
+              <input id="shares" type="number" min="1" step="1" placeholder="600" required />
+            </label>
+            <button id="add-button" class="primary-button add-button" type="submit">添加</button>
+          </form>
+        </section>
+
+        <p id="app-status" class="status hidden" role="status"></p>
+
+        <section class="records-section">
+          <div class="section-heading">
+            <h2>操作记录</h2>
+            <span id="record-count">0 条</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>日期</th>
+                  <th>名称</th>
+                  <th>代码</th>
+                  <th>操作</th>
+                  <th>单价</th>
+                  <th>操作股数</th>
+                  <th>操作</th>
+                </tr>
+              </thead>
+              <tbody id="records-body">
+                <tr>
+                  <td class="empty-cell" colspan="7">正在加载...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <script src="./config.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="./app.js"></script>
+  </body>
+</html>
