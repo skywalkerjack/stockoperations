@@ -32,3 +32,9 @@ Supabase URL、anon key 和共享邮箱会出现在前端代码中，这是 Supa
 ## 下载 JSON 备份
 
 双击 `download-stock-operations.cmd`，输入共享账号密码后，会下载 `config.js` 中 `tableName` 指定的 Supabase 表，并覆盖生成 `stock-operations.json`。
+
+## 持仓盈亏图表
+
+页面会读取 `config.js` 中的 `priceTableName`，默认是 `stock_latest_prices`。请先在 Supabase SQL Editor 执行根目录的 `supabase/schema.sql`，创建当前价表和 RLS 策略。
+
+当前价由网页手动维护：登录后在“当前价维护”区域输入每只持仓股票的当前价并保存，页面会自动计算持仓市值、成本、浮动盈亏和盈亏率，并生成图表。

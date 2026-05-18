@@ -3,4 +3,5 @@ window.STOCK_ADMIN_CONFIG = {
   anonKey: "sb_publishable_0J1iJDt4MyObWFCXEKrhOg_-8Zf8lAR",
   adminEmail: "owner@stockmonitor.local",
   tableName: "stock_operations",
+  priceTableName: "stock_latest_prices",
 };

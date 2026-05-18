@@ -74,6 +74,36 @@
 
         <p id="app-status" class="status hidden" role="status"></p>
 
+        <section class="insights-section" aria-label="Portfolio insight">
+          <div class="section-heading">
+            <h2>&#25345;&#20179;&#30408;&#20111;</h2>
+            <span id="price-count">0 &#21482;&#32929;&#31080;</span>
+          </div>
+          <div id="summary-cards" class="summary-grid"></div>
+          <div class="chart-grid">
+            <div class="chart-panel">
+              <h3>&#28014;&#21160;&#30408;&#20111;</h3>
+              <div class="chart-box">
+                <canvas id="profit-chart"></canvas>
+              </div>
+            </div>
+            <div class="chart-panel">
+              <h3>&#25345;&#20179;&#24066;&#20540;&#21344;&#27604;</h3>
+              <div class="chart-box">
+                <canvas id="value-chart"></canvas>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="price-section" aria-label="Latest prices">
+          <div class="section-heading">
+            <h2>&#24403;&#21069;&#20215;&#32500;&#25252;</h2>
+            <span>&#25163;&#21160;&#20445;&#23384;&#26368;&#26032;&#20215;</span>
+          </div>
+          <div id="price-list" class="price-list"></div>
+        </section>
+
         <section class="records-section">
           <div class="section-heading">
             <h2>操作记录</h2>
@@ -105,6 +135,7 @@
 
     <script src="./config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
     <script src="./app.js"></script>
   </body>
 </html>
