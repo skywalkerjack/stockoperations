@@ -377,7 +377,7 @@ td select {
   }
 
   .app-view {
-    padding: 16px;
+    padding: 12px;
   }
 
   .top-actions,
@@ -387,5 +387,131 @@ td select {
 
   .record-form {
     grid-template-columns: 1fr;
+  }
+
+  .topbar {
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  .topbar h1 {
+    font-size: 26px;
+  }
+
+  .toolbar {
+    padding: 14px;
+  }
+
+  .section-heading {
+    padding: 14px;
+  }
+
+  .table-wrap {
+    overflow: visible;
+  }
+
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td {
+    display: block;
+  }
+
+  table {
+    min-width: 0;
+  }
+
+  thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  tbody {
+    display: grid;
+    gap: 12px;
+    padding: 12px;
+    background: #f3f6fa;
+  }
+
+  tbody tr {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: #ffffff;
+    overflow: hidden;
+  }
+
+  td {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    gap: 10px;
+    align-items: center;
+    min-height: 46px;
+    padding: 10px 12px;
+    border-bottom: 1px solid #edf0f5;
+    font-size: 15px;
+  }
+
+  td::before {
+    color: var(--muted);
+    font-size: 12px;
+    font-weight: 800;
+  }
+
+  td:nth-child(1)::before {
+    content: "\65E5\671F";
+  }
+
+  td:nth-child(2)::before {
+    content: "\540D\79F0";
+  }
+
+  td:nth-child(3)::before {
+    content: "\4EE3\7801";
+  }
+
+  td:nth-child(4)::before {
+    content: "\64CD\4F5C";
+  }
+
+  td:nth-child(5)::before {
+    content: "\5355\4EF7";
+  }
+
+  td:nth-child(6)::before {
+    content: "\64CD\4F5C\80A1\6570";
+  }
+
+  td:nth-child(7)::before {
+    content: "\7BA1\7406";
+  }
+
+  td input,
+  td select {
+    min-width: 0;
+  }
+
+  .row-actions {
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .action-button {
+    min-height: 36px;
+  }
+
+  .empty-cell {
+    display: block;
+    height: auto;
+    padding: 28px 12px;
+  }
+
+  .empty-cell::before {
+    content: "";
   }
 }

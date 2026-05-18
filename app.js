@@ -29,11 +29,27 @@ const els = {
   downloadButton: document.querySelector('#download-button'),
   addForm: document.querySelector('#add-form'),
   addButton: document.querySelector('#add-button'),
+  dateInput: document.querySelector('#date'),
   loginStatus: document.querySelector('#login-status'),
   appStatus: document.querySelector('#app-status'),
   recordsBody: document.querySelector('#records-body'),
   recordCount: document.querySelector('#record-count'),
 };
+
+function getTodayTradeDate() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}${day}`;
+}
+
+function setDefaultTradeDate(force = false) {
+  if (!els.dateInput) return;
+  if (force || !els.dateInput.value) {
+    els.dateInput.value = getTodayTradeDate();
+  }
+}
 
 function showStatus(message, type = 'success') {
   [els.loginStatus, els.appStatus].forEach((status) => {
@@ -62,6 +78,7 @@ function showLogin() {
 function showApp() {
   els.loginView.classList.add('hidden');
   els.appView.classList.remove('hidden');
+  setDefaultTradeDate();
 }
 
 function getFormRecord(form) {
@@ -257,6 +274,7 @@ async function addRecord(event) {
     if (error) throw error;
 
     els.addForm.reset();
+    setDefaultTradeDate(true);
     document.querySelector('#operation').value = '买入';
     showStatus('记录已添加');
     await loadRecords();
