@@ -3,7 +3,6 @@ const SUPABASE_URL = config.supabaseUrl || '';
 const SUPABASE_ANON_KEY = config.anonKey || '';
 const SHARED_LOGIN_EMAIL = config.adminEmail || '';
 const TABLE_NAME = config.tableName || '';
-const PRICE_TABLE_NAME = config.priceTableName || 'stock_latest_prices';
 
 const isConfigured =
   TABLE_NAME &&
@@ -16,10 +15,7 @@ const db = isConfigured ? window.supabase.createClient(SUPABASE_URL, SUPABASE_AN
 const state = {
   session: null,
   records: [],
-  latestPrices: [],
   editingId: null,
-  profitChart: null,
-  valueChart: null,
 };
 
 const els = {
@@ -38,11 +34,6 @@ const els = {
   appStatus: document.querySelector('#app-status'),
   recordsBody: document.querySelector('#records-body'),
   recordCount: document.querySelector('#record-count'),
-  priceCount: document.querySelector('#price-count'),
-  priceList: document.querySelector('#price-list'),
-  summaryCards: document.querySelector('#summary-cards'),
-  profitChart: document.querySelector('#profit-chart'),
-  valueChart: document.querySelector('#value-chart'),
 };
 
 function getTodayTradeDate() {
@@ -141,224 +132,6 @@ function operationClass(operation) {
   return '';
 }
 
-function formatMoney(value) {
-  if (!Number.isFinite(value)) return '--';
-  return value.toLocaleString('zh-CN', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  });
-}
-
-function formatPercent(value) {
-  if (!Number.isFinite(value)) return '--';
-  return `${value.toFixed(2)}%`;
-}
-
-function getOperationKind(operation) {
-  const value = String(operation || '');
-  if (value.includes('\u4e70') || value.includes('\u52a0') || value.includes('æ¶”') || value.includes('é”')) {
-    return 'buy';
-  }
-  if (value.includes('\u5356') || value.includes('\u51cf') || value.includes('é—') || value.includes('é‘')) {
-    return 'sell';
-  }
-  return 'other';
-}
-
-function getPriceMap() {
-  return new Map(state.latestPrices.map((price) => [price.stock_code, price]));
-}
-
-function calculateHoldings() {
-  const holdings = new Map();
-  const sorted = [...state.records].sort((a, b) => {
-    const dateCompare = String(a.trade_date || '').localeCompare(String(b.trade_date || ''));
-    if (dateCompare !== 0) return dateCompare;
-    return String(a.created_at || '').localeCompare(String(b.created_at || ''));
-  });
-
-  sorted.forEach((record) => {
-    const stockCode = String(record.stock_code || '').trim().toUpperCase();
-    if (!stockCode) return;
-
-    const current =
-      holdings.get(stockCode) ||
-      {
-        stock_code: stockCode,
-        stock_name: record.stock_name || stockCode,
-        shares: 0,
-        cost: 0,
-      };
-
-    current.stock_name = record.stock_name || current.stock_name;
-
-    const shares = Number(record.operation_shares) || 0;
-    const unitPrice = Number(record.unit_price) || 0;
-    const kind = getOperationKind(record.operation);
-
-    if (kind === 'buy') {
-      current.cost += unitPrice * shares;
-      current.shares += shares;
-    }
-
-    if (kind === 'sell' && current.shares > 0) {
-      const reduceShares = Math.min(shares, current.shares);
-      const averageCost = current.cost / current.shares;
-      current.cost -= averageCost * reduceShares;
-      current.shares -= reduceShares;
-
-      if (current.shares <= 0.000001) {
-        current.shares = 0;
-        current.cost = 0;
-      }
-    }
-
-    holdings.set(stockCode, current);
-  });
-
-  const priceMap = getPriceMap();
-
-  return [...holdings.values()]
-    .filter((holding) => holding.shares > 0)
-    .map((holding) => {
-      const latestPrice = priceMap.get(holding.stock_code);
-      const currentPrice = latestPrice ? Number(latestPrice.current_price) : null;
-      const marketValue = Number.isFinite(currentPrice) ? currentPrice * holding.shares : null;
-      const profit = Number.isFinite(marketValue) ? marketValue - holding.cost : null;
-      const profitRate = Number.isFinite(profit) && holding.cost > 0 ? (profit / holding.cost) * 100 : null;
-
-      return {
-        ...holding,
-        average_cost: holding.shares > 0 ? holding.cost / holding.shares : 0,
-        current_price: currentPrice,
-        market_value: marketValue,
-        profit,
-        profit_rate: profitRate,
-        quoted_at: latestPrice ? latestPrice.quoted_at : null,
-      };
-    });
-}
-
-function renderDashboard() {
-  const holdings = calculateHoldings();
-  renderSummary(holdings);
-  renderPriceEditor(holdings);
-  renderCharts(holdings);
-}
-
-function renderSummary(holdings) {
-  const priced = holdings.filter((holding) => Number.isFinite(holding.market_value));
-  const totalValue = priced.reduce((sum, holding) => sum + holding.market_value, 0);
-  const totalCost = priced.reduce((sum, holding) => sum + holding.cost, 0);
-  const totalProfit = totalValue - totalCost;
-  const totalProfitRate = totalCost > 0 ? (totalProfit / totalCost) * 100 : null;
-  const missingCount = holdings.length - priced.length;
-
-  els.summaryCards.innerHTML = [
-    ['\u603b\u5e02\u503c', formatMoney(totalValue)],
-    ['\u603b\u6210\u672c', formatMoney(totalCost)],
-    ['\u6d6e\u52a8\u76c8\u4e8f', formatMoney(totalProfit), totalProfit >= 0 ? 'positive' : 'negative'],
-    ['\u76c8\u4e8f\u7387', formatPercent(totalProfitRate), totalProfit >= 0 ? 'positive' : 'negative'],
-  ]
-    .map(
-      ([label, value, tone]) => `
-        <div class="summary-card ${tone || ''}">
-          <span>${label}</span>
-          <strong>${value}</strong>
-        </div>
-      `,
-    )
-    .join('');
-
-  els.priceCount.textContent = `${holdings.length} \u53ea\u6301\u4ed3 / ${missingCount} \u53ea\u5f85\u8865\u4ef7`;
-}
-
-function renderPriceEditor(holdings) {
-  if (holdings.length === 0) {
-    els.priceList.innerHTML = '<p class="empty-note">\u6682\u65e0\u6301\u4ed3\u80a1\u7968</p>';
-    return;
-  }
-
-  els.priceList.innerHTML = holdings
-    .map((holding) => {
-      const currentPrice = Number.isFinite(holding.current_price) ? holding.current_price : '';
-      const quotedAt = holding.quoted_at ? new Date(holding.quoted_at).toLocaleString('zh-CN') : '\u672a\u4fdd\u5b58';
-
-      return `
-        <div class="price-row" data-code="${escapeHtml(holding.stock_code)}" data-name="${escapeHtml(holding.stock_name)}">
-          <div>
-            <strong>${escapeHtml(holding.stock_name)}</strong>
-            <span>${escapeHtml(holding.stock_code)} · ${holding.shares} \u80a1</span>
-          </div>
-          <label>
-            \u5f53\u524d\u4ef7
-            <input class="latest-price-input" type="number" min="0" step="0.0001" value="${currentPrice}" placeholder="0.0000" />
-          </label>
-          <span class="quote-time">${quotedAt}</span>
-          <button class="action-button" data-action="save-price" type="button">\u4fdd\u5b58</button>
-        </div>
-      `;
-    })
-    .join('');
-}
-
-function renderCharts(holdings) {
-  if (!window.Chart || !els.profitChart || !els.valueChart) return;
-
-  const priced = holdings.filter((holding) => Number.isFinite(holding.market_value));
-  const labels = priced.map((holding) => holding.stock_name || holding.stock_code);
-  const profits = priced.map((holding) => Number(holding.profit.toFixed(2)));
-  const values = priced.map((holding) => Number(holding.market_value.toFixed(2)));
-
-  if (state.profitChart) state.profitChart.destroy();
-  if (state.valueChart) state.valueChart.destroy();
-
-  state.profitChart = new Chart(els.profitChart, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: '\u6d6e\u52a8\u76c8\u4e8f',
-          data: profits,
-          backgroundColor: profits.map((value) => (value >= 0 ? '#1f8a63' : '#c24135')),
-          borderRadius: 6,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-      },
-      scales: {
-        y: { ticks: { callback: (value) => formatMoney(Number(value)) } },
-      },
-    },
-  });
-
-  state.valueChart = new Chart(els.valueChart, {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [
-        {
-          data: values,
-          backgroundColor: ['#166853', '#2d7dd2', '#d19a2a', '#8b5cf6', '#d14f72', '#2f9e9b'],
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom' },
-      },
-    },
-  });
-}
-
 function renderRecords() {
   els.recordCount.textContent = `${state.records.length} 条`;
 
@@ -450,26 +223,6 @@ async function loadRecords() {
   renderRecords();
 }
 
-async function loadLatestPrices() {
-  if (!db) return;
-
-  const { data, error } = await db.from(PRICE_TABLE_NAME).select('*');
-
-  if (error) {
-    state.latestPrices = [];
-    showStatus(error.message, 'error');
-    return;
-  }
-
-  state.latestPrices = data || [];
-}
-
-async function loadDashboard() {
-  await loadRecords();
-  await loadLatestPrices();
-  renderDashboard();
-}
-
 async function login(password) {
   if (!db) {
     showStatus('请先在 config.js 中填写 Supabase URL、anon key、共享登录邮箱和表名', 'error');
@@ -494,7 +247,7 @@ async function login(password) {
   state.session = data.session;
   els.password.value = '';
   showApp();
-  await loadDashboard();
+  await loadRecords();
 }
 
 async function logout() {
@@ -524,7 +277,7 @@ async function addRecord(event) {
     setDefaultTradeDate(true);
     document.querySelector('#operation').value = '买入';
     showStatus('记录已添加');
-    await loadDashboard();
+    await loadRecords();
   } catch (error) {
     showStatus(error.message || '添加失败', 'error');
   } finally {
@@ -555,7 +308,7 @@ async function saveRecord(row, id) {
 
     state.editingId = null;
     showStatus('修改已保存');
-    await loadDashboard();
+    await loadRecords();
   } catch (error) {
     showStatus(error.message || '保存失败', 'error');
   } finally {
@@ -581,43 +334,7 @@ async function deleteRecord(record) {
   }
 
   showStatus('记录已删除');
-  await loadDashboard();
-}
-
-async function saveLatestPrice(row) {
-  if (!db) {
-    showStatus('\u8bf7\u5148\u5b8c\u6210 Supabase \u914d\u7f6e', 'error');
-    return;
-  }
-
-  const stockCode = row.dataset.code;
-  const stockName = row.dataset.name;
-  const input = row.querySelector('.latest-price-input');
-  const currentPrice = Number(input.value);
-
-  if (!Number.isFinite(currentPrice) || currentPrice <= 0) {
-    showStatus('\u8bf7\u8f93\u5165\u6709\u6548\u5f53\u524d\u4ef7', 'error');
-    return;
-  }
-
-  const { error } = await db.from(PRICE_TABLE_NAME).upsert(
-    {
-      stock_code: stockCode,
-      stock_name: stockName,
-      current_price: currentPrice,
-      quoted_at: new Date().toISOString(),
-    },
-    { onConflict: 'stock_code' },
-  );
-
-  if (error) {
-    showStatus(error.message, 'error');
-    return;
-  }
-
-  showStatus('\u5f53\u524d\u4ef7\u5df2\u4fdd\u5b58');
-  await loadLatestPrices();
-  renderDashboard();
+  await loadRecords();
 }
 
 function downloadJson() {
@@ -646,17 +363,10 @@ els.loginForm.addEventListener('submit', (event) => {
 });
 
 els.logoutButton.addEventListener('click', logout);
-els.refreshButton.addEventListener('click', loadDashboard);
+els.refreshButton.addEventListener('click', loadRecords);
 els.downloadButton.addEventListener('click', downloadJson);
 els.addForm.addEventListener('submit', addRecord);
 
-els.priceList.addEventListener('click', (event) => {
-  const button = event.target.closest('button[data-action="save-price"]');
-  if (!button) return;
-
-  const row = button.closest('.price-row');
-  saveLatestPrice(row);
-});
 
 els.recordsBody.addEventListener('click', (event) => {
   const button = event.target.closest('button[data-action]');
@@ -691,7 +401,7 @@ if (db) {
     state.session = data.session;
     if (state.session) {
       showApp();
-      loadDashboard();
+      loadRecords();
     } else {
       showLogin();
     }

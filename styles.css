@@ -99,8 +99,6 @@ h2 {
 
 .login-panel,
 .toolbar,
-.insights-section,
-.price-section,
 .records-section {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -201,8 +199,6 @@ h2 {
 }
 
 .toolbar,
-.insights-section,
-.price-section,
 .records-section,
 .status {
   max-width: 1280px;
@@ -243,109 +239,6 @@ h2 {
 
 .records-section {
   overflow: hidden;
-}
-
-.insights-section,
-.price-section {
-  overflow: hidden;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 12px;
-  padding: 18px;
-}
-
-.summary-card {
-  display: grid;
-  gap: 8px;
-  min-height: 88px;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel-soft);
-  padding: 14px;
-}
-
-.summary-card span {
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.summary-card strong {
-  color: #1d2a39;
-  font-size: 22px;
-}
-
-.summary-card.positive strong {
-  color: #12684f;
-}
-
-.summary-card.negative strong {
-  color: var(--danger);
-}
-
-.chart-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
-  gap: 16px;
-  padding: 0 18px 18px;
-}
-
-.chart-panel {
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: #ffffff;
-  padding: 14px;
-}
-
-.chart-panel h3 {
-  margin: 0 0 12px;
-  color: #344256;
-  font-size: 15px;
-}
-
-.chart-box {
-  position: relative;
-  height: 300px;
-}
-
-.price-list {
-  display: grid;
-  gap: 10px;
-  padding: 18px;
-}
-
-.price-row {
-  display: grid;
-  grid-template-columns: minmax(180px, 1.2fr) minmax(140px, 0.7fr) minmax(160px, 0.8fr) auto;
-  gap: 12px;
-  align-items: end;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  background: var(--panel-soft);
-  padding: 12px;
-}
-
-.price-row > div {
-  display: grid;
-  gap: 4px;
-}
-
-.price-row strong {
-  font-size: 15px;
-}
-
-.price-row span,
-.quote-time,
-.empty-note {
-  color: var(--muted);
-  font-size: 13px;
-}
-
-.empty-note {
-  padding: 18px;
 }
 
 .section-heading {
@@ -473,15 +366,6 @@ td select {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .summary-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .chart-grid,
-  .price-row {
-    grid-template-columns: 1fr;
-  }
-
   .add-button {
     width: 100%;
   }
@@ -514,30 +398,8 @@ td select {
     font-size: 26px;
   }
 
-  .toolbar,
-  .price-list {
+  .toolbar {
     padding: 14px;
-  }
-
-  .summary-grid {
-    grid-template-columns: 1fr;
-    padding: 14px;
-  }
-
-  .summary-card {
-    min-height: 74px;
-  }
-
-  .chart-grid {
-    padding: 0 14px 14px;
-  }
-
-  .chart-box {
-    height: 260px;
-  }
-
-  .price-row {
-    align-items: stretch;
   }
 
   .section-heading {
